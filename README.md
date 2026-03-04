@@ -41,6 +41,13 @@ Run from inside a tmux pane:
 helpme
 ```
 
+Pass the assistant command directly (overrides `HELPME_COMMAND`):
+
+```bash
+helpme codex
+helpme opencode --prompt
+```
+
 ## Configuration
 
 `HELPME_COMMAND` is the only configuration variable.
@@ -56,6 +63,12 @@ Set it per command:
 ```bash
 HELPME_COMMAND="codex" helpme
 HELPME_COMMAND="claude" helpme
+```
+
+Positional arguments take precedence over `HELPME_COMMAND`:
+
+```bash
+HELPME_COMMAND="claude" helpme codex
 ```
 
 Set it in your shell config:

@@ -30,6 +30,30 @@ After running commands, re-capture output from pane ${source_pane}, summarize fi
 EOF
 }
 
+build_shell_command() {
+  local prompt="$1"
+  shift
+
+  local assistant_command
+  local shell_command
+  local arg
+  shell_command=""
+
+  if (($# > 0)); then
+    for arg in "$@"; do
+      shell_command+=$(shell_single_quote "$arg")
+      shell_command+=" "
+    done
+    shell_command+=$(shell_single_quote "$prompt")
+    printf "%s" "$shell_command"
+    return
+  fi
+
+  assistant_command="${HELPME_COMMAND:-$DEFAULT_HELPME_COMMAND}"
+  shell_command="${assistant_command} $(shell_single_quote "$prompt")"
+  printf "%s" "$shell_command"
+}
+
 if [[ -z "${TMUX:-}" ]]; then
   echo "helpme must be run from inside a tmux pane." >&2
   exit 1
@@ -41,9 +65,8 @@ if ! command -v tmux >/dev/null 2>&1; then
 fi
 
 source_pane="${TMUX_PANE:-current pane}"
-assistant_command="${HELPME_COMMAND:-$DEFAULT_HELPME_COMMAND}"
 prompt="$(build_prompt "$source_pane")"
-shell_command="${assistant_command} $(shell_single_quote "$prompt")"
+shell_command="$(build_shell_command "$prompt" "$@")"
 
 if tmux split-window -c "#{pane_current_path}" "$shell_command"; then
   exit 0
