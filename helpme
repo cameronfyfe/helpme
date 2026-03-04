@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+DEFAULT_HELPME_COMMAND="opencode --prompt"
+
+shell_single_quote() {
+  local value="${1-}"
+
+  if [[ -z "$value" ]]; then
+    printf "''"
+    return
+  fi
+
+  printf "'%s'" "${value//\'/\'\"\'\"\'}"
+}
+
+build_prompt() {
+  local source_pane="$1"
+
+  cat <<EOF
+You are running in a tmux pane next to the user and should help with their terminal issue.
+Ignore the user's \`helpme\` command itself; it was only used to start this assistant pane.
+The user's original pane is ${source_pane}. Inspect it first to understand context:
+tmux capture-pane -p -t ${source_pane} | tail -n 200
+When you need to run commands for the user, run them in pane ${source_pane}, not in your own pane.
+Use tmux targeting such as:
+tmux send-keys -t ${source_pane} '<command>' C-m
+After running commands, re-capture output from pane ${source_pane}, summarize findings, ask a focused follow-up if needed, and help fix the issue.
+EOF
+}
+
+if [[ -z "${TMUX:-}" ]]; then
+  echo "helpme must be run from inside a tmux pane." >&2
+  exit 1
+fi
+
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "failed to execute tmux: command not found" >&2
+  exit 1
+fi
+
+source_pane="${TMUX_PANE:-current pane}"
+assistant_command="${HELPME_COMMAND:-$DEFAULT_HELPME_COMMAND}"
+prompt="$(build_prompt "$source_pane")"
+shell_command="${assistant_command} $(shell_single_quote "$prompt")"
+
+if tmux split-window -c "#{pane_current_path}" "$shell_command"; then
+  exit 0
+else
+  status=$?
+  echo "tmux split-window failed with status: ${status}" >&2
+  exit 1
+fi
