@@ -2,6 +2,32 @@
 
 `helpme` is a Bash script that opens a new tmux split and starts an assistant CLI with context from your original pane.
 
+## Install
+
+Install with Nix:
+
+```bash
+nix profile install github:cameronfyfe/helpme
+```
+
+Or, from this repo directory, install `helpme` into your `PATH`:
+
+```bash
+install -Dm755 ./helpme ~/.local/bin/helpme
+```
+
+Or install system-wide:
+
+```bash
+sudo install -m 755 ./helpme /usr/local/bin/helpme
+```
+
+Then verify:
+
+```bash
+command -v helpme
+```
+
 ## Quick Start
 
 Requirements:
@@ -57,4 +83,3 @@ Check formatting:
 ```bash
 just fmt-check
 ```
-
