@@ -2,6 +2,8 @@
 
 `helpme` is a Bash script that opens a new tmux split and starts an assistant CLI with context from your original pane.
 
+![Demo](readme/demo.gif)
+
 ## Install
 
 Install with Nix:
